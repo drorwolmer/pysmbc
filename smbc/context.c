@@ -941,6 +941,28 @@ Context_setOptionFullTimeNames (Context *self, PyObject *value,
 }
 
 static PyObject *
+Context_getOptionOneSharePerServer (Context *self, void *closure)
+{
+  smbc_bool b;
+  b = smbc_getOptionOneSharePerServer (self->context);
+  return PyBool_FromLong ((long) b);
+}
+
+static int
+Context_setOptionOneSharePerServer (Context *self, PyObject *value,
+				void *closure)
+{
+  if (!PyBool_Check (value))
+    {
+      PyErr_SetString (PyExc_TypeError, "must be Boolean");
+      return -1;
+    }
+
+  smbc_setOptionOneSharePerServer (self->context, value == Py_True);
+  return 0;
+}
+
+static PyObject *
 Context_getOptionNoAutoAnonymousLogin (Context *self, void *closure)
 {
   smbc_bool b;
@@ -1044,10 +1066,16 @@ PyGetSetDef Context_getseters[] =
       "Whether to log to standard error instead of standard output.",
       NULL },
 
-		{ "optionFullTimeNames",
+    { "optionFullTimeNames",
       (getter) Context_getOptionFullTimeNames,
       (setter) Context_setOptionFullTimeNames,
       "Use full time names (Create Time)",
+      NULL },
+
+    { "optionOneSharePerServer",
+      (getter) Context_getOptionOneSharePerServer,
+      (setter) Context_setOptionOneSharePerServer,
+      "Set whether to use the same connection for all shares on a server.",
       NULL },
 
     { "optionNoAutoAnonymousLogin",
